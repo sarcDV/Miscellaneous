@@ -8,6 +8,39 @@ from scipy import ndimage, misc
 from progressbar import ProgressBar
 from skimage.metrics import structural_similarity as ssim
 ###########################################################################
+##### Auxiliaries  ########################################################
+###########################################################################
+
+def pad3D(invol, max1d, max2d, max3d):
+    aa = np.pad(invol, 
+            (((max1d-invol.shape[0])//2, (max1d-invol.shape[0])//2),
+             ((max2d-invol.shape[1])//2, (max2d-invol.shape[1])//2),
+             ((max3d-invol.shape[2])//2, (max3d-invol.shape[2])//2)), 
+            'constant')
+
+    if aa.shape[0] == (int(max1d)-1):
+        aa = np.pad(aa, ((1,0),(0,0),(0,0)), 'constant')
+    if aa.shape[1] == (int(max2d)-1):
+        aa = np.pad(aa, ((0,0),(1,0),(0,0)), 'constant')
+    if aa.shape[2] == (int(max3d)-1):
+        aa = np.pad(aa, ((0,0),(0,0),(1,0)), 'constant')
+
+    return aa
+
+def pad2D(invol, max1d, max2d):
+    aa = np.pad(invol, 
+            (((max1d-invol.shape[0])//2, (max1d-invol.shape[0])//2),
+             ((max2d-invol.shape[1])//2, (max2d-invol.shape[1])//2)), 
+            'constant')
+
+    if aa.shape[0] == (int(max1d)-1):
+        aa = np.pad(aa, ((1,0),(0,0),(0,0)), 'constant')
+    if aa.shape[1] == (int(max2d)-1):
+        aa = np.pad(aa, ((0,0),(1,0),(0,0)), 'constant')
+
+    return aa
+
+###########################################################################
 ##### Motion  #############################################################
 ###########################################################################
 
@@ -90,16 +123,21 @@ def corrupt_recursively(test):
 test = nib.load('T1_sag_1_o.nii.gz').get_fdata()
 
 ssimarray_ = np.zeros((100))
-
+niiinit_ = np.zeros((256,512,len(ssimarray_)))
 for ii in range(0, len(ssimarray_)):
     img, cor, slice, orient = corrupt_recursively(test)
     print("Iteration# "+str(ii+1)+", SSIM="+str(ssim(img, cor, data_range=1))+\
           " slice: "+str(slice)+", orientation: " +str(orient))
     ssimarray_[ii] = ssim(img, cor, data_range=1)
-
+    img = pad2D(img, 256, 256)
+    cor = pad2D(cor, 256, 256)
+    comb = np.concatenate((img, cor), axis=1)
+    niiinit_[:,:,ii] = comb 
+    
+    
 plt.figure()
 plt.plot(ssimarray_)
 plt.show()
 
-# c_= nib.Nifti1Image(np.abs(test_m), None)
-# nib.save(c_, 'test_m3D_gaussian.nii.gz')
+c_= nib.Nifti1Image(np.abs(niiinit_), None)
+nib.save(c_, 'test_new_2D.nii.gz')
