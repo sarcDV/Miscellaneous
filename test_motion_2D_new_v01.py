@@ -202,33 +202,35 @@ def corrupt_recursively(test):
     return img, cor, rndslice_, rnd_orient
 
 def select_slice_orientation(test):
-    rnd_orient = np.random.randint(0,3,1)[0]
-    # print(rnd_orient)
-    if rnd_orient == 0:
-        rndslice_ = np.random.randint(low=int(test.shape[1]//2)-int(test.shape[1]//4), 
-                                    high=int(test.shape[1]//2)+int(test.shape[1]//4), 
-                                    size=1)
-        
-        img = (test[:,rndslice_[0],:])
-        img = (img-img.min())/(img.max()-img.min())
-        
-    elif rnd_orient == 1:
-        rndslice_ = np.random.randint(low=int(test.shape[2]//2)-int(test.shape[2]//4), 
-                                    high=int(test.shape[2]//2)+int(test.shape[2]//4), 
-                                    size=1)
-                                   
-        img = np.rot90(test[:,:,rndslice_[0]]) 
-        img = (img-img.min())/(img.max()-img.min())
-        
-    else:
-        rndslice_ = np.random.randint(low=int(test.shape[0]//2)-int(test.shape[0]//4), 
-                                    high=int(test.shape[0]//2)+int(test.shape[0]//4), 
-                                    size=1)
+    if test.shape[2] > (test.shape[0]//2):
+        rnd_orient = np.random.randint(0,3,1)[0]
+        # print(rnd_orient)
+        if rnd_orient == 0:
+            rndslice_ = np.random.randint(low=int(test.shape[1]//2)-int(test.shape[1]//4), 
+                                        high=int(test.shape[1]//2)+int(test.shape[1]//4), 
+                                        size=1)
+            
+            img = (test[:,rndslice_[0],:])
+        elif rnd_orient == 1:
+            rndslice_ = np.random.randint(low=int(test.shape[2]//2)-int(test.shape[2]//4), 
+                                        high=int(test.shape[2]//2)+int(test.shape[2]//4), 
+                                        size=1)
                                     
-        img = np.flipud(test[rndslice_[0],:,:])
-        img = (img-img.min())/(img.max()-img.min())
-        cor = generate_motion_2d(img)
+            img = np.rot90(test[:,:,rndslice_[0]])    
+        else:
+            rndslice_ = np.random.randint(low=int(test.shape[0]//2)-int(test.shape[0]//4), 
+                                        high=int(test.shape[0]//2)+int(test.shape[0]//4), 
+                                        size=1)                            
+            img = np.flipud(test[rndslice_[0],:,:])
+    else:
+        rnd_orient = 1
+        rndslice_ = np.random.randint(low=int(test.shape[2]//2)-int(test.shape[2]//4), 
+                                        high=int(test.shape[2]//2)+int(test.shape[2]//4), 
+                                        size=1)                           
+        img = np.rot90(test[:,:,rndslice_[0]]) 
 
+    img = (img-img.min())/(img.max()-img.min())
+            
     return img, rndslice_, rnd_orient
 ###########################################################################
 ##### Motion Corruption Class  ############################################
@@ -303,10 +305,10 @@ class MoCoDataset():
 ### 3 - create data loader with [batch_size, channel, width, height]
 
 #test = nib.load('./niifiles/T1_sag_1_o.nii.gz').get_fdata()
-# test = nib.load('./niifiles/IXI002-Guys-0828-T1.nii.gz').get_fdata()
+test = nib.load('./niifiles/IXI002-Guys-0828-T1.nii.gz').get_fdata()
 # test = nib.load('./niifiles/IXI527-HH-2376-PD.nii.gz').get_fdata()
 # test = nib.load('./niifiles/IXI662-Guys-1120-T2.nii.gz').get_fdata()
-test = nib.load('./niifiles/au70_025_ON.nii.gz').get_fdata()
+# test = nib.load('./niifiles/au70_025_ON.nii.gz').get_fdata()
 # test = nib.load('./niifiles/au70_T1_ON_enhanced.nii.gz').get_fdata()
 # img, cor, slice, orient = corrupt_recursively(test)
 
@@ -373,7 +375,7 @@ while ii < len(ssimarray_):
     #     ii = ii
 
 c_= nib.Nifti1Image(np.abs(niiinit_), None)
-nib.save(c_, 'test_new_2D_v13.nii.gz')
+nib.save(c_, 'test_new_2D_v14.nii.gz')
 # plt.figure()
 # plt.plot(ssimarray_,'*-')
 # plt.title('SSIM')
