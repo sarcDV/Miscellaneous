@@ -1,6 +1,3 @@
-Certo! Ecco un esempio di codice PyTorch per un modello di Markov nascosto:
-
-```python
 import torch
 import torch.nn as nn
 
@@ -24,8 +21,3 @@ model = HMM(num_states=3, num_obs=2)
 obs = torch.tensor([0, 1, 0, 1])
 log_prob = model(obs)
 print(log_prob)
-```
-
-Questo codice definisce una classe `HMM` che estende la classe `nn.Module` di PyTorch. La classe `HMM` ha tre parametri: `A`, `B` e `pi`, che rappresentano la matrice di transizione, la matrice di emissione e la distribuzione di probabilità iniziale del modello di Markov nascosto, rispettivamente. Il metodo `forward` della classe `HMM` calcola la log-probabilità dell'osservazione data una sequenza di osservazioni.
-
-Spero che questo ti sia utile! Fammi sapere se hai altre domande.
